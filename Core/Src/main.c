@@ -27,8 +27,10 @@
 #include "retarget.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <string.h>
 #include "keypad.h"
+#include "lcd3310_GPIO.h"
 
 /* USER CODE END Includes */
 
@@ -70,6 +72,7 @@ static void MX_USART2_UART_Init(void);
 void principal(void);
 void ingresarValor(void);
 void modificarTempPredefinida(void);
+void mostrarTemperaturasLCD(char *temperaturaActual, char *temperaturaObjetivo);
 
 /* USER CODE END PFP */
 
@@ -85,7 +88,8 @@ void modificarTempPredefinida(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+  char stringCelsius[10] = "";
+  float celsius = 0.0;
   /* USER CODE END 1 */
   
 
@@ -111,6 +115,11 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   RetargetInit(&huart2);		// INICIA LA TRANSFERENCIA POR UART2
+  //Inicializar la pantalla LCD
+  LCDInit();
+  LCDContrast (0x60);
+  LCDClear();
+  LCDUpdate();
   keypad_init(); 				// Inicializa el teclado
 
   /* USER CODE END 2 */
@@ -124,6 +133,11 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
+	// sprintf(stringCelsius, "%.4f", celsius);			 	// Conversión de celsius a string
+
+	// mostrarTemperaturasLCD(stringCelsius, arrayModificar);		// Array copia es la temperatura objetivo
+	// memset(stringCelsius, 0, 10);							// Limpia la variable stringCelsius
 
 	if(menu == 0)
 		principal(); 											// Por default la variable menu = 0 entrando inicialmente aqui
@@ -209,9 +223,23 @@ static void MX_USART2_UART_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOA_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_4|GPIO_PIN_5 
+                          |GPIO_PIN_6, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : PA0 PA1 PA4 PA5 
+                           PA6 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_4|GPIO_PIN_5 
+                          |GPIO_PIN_6;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 }
 
@@ -284,6 +312,16 @@ void modificarTempPredefinida(){ 	// Funcion para modificar la temp predefinida
 				i--;
 			}
 		}
+}
+
+void mostrarTemperaturasLCD(char *temperaturaActual, char *temperaturaObjetivo){
+	LCDStr(0, (unsigned char *) "T Actual (°C)", 0);
+	LCDStr(1, (unsigned char *) temperaturaActual, 0);
+	LCDStr(3, (unsigned char *) "T Fijada (°C)", 0);
+	LCDStr(4, (unsigned char *) temperaturaObjetivo, 0);
+	LCDUpdate();
+
+	return;
 }
 
 /* USER CODE END 4 */
