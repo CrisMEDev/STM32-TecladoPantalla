@@ -134,10 +134,10 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-	// sprintf(stringCelsius, "%.4f", celsius);			 	// Conversión de celsius a string
+	sprintf(stringCelsius, "%.4f", celsius);			 	// Conversión de celsius a string
 
-	// mostrarTemperaturasLCD(stringCelsius, arrayModificar);		// Array copia es la temperatura objetivo
-	// memset(stringCelsius, 0, 10);							// Limpia la variable stringCelsius
+	mostrarTemperaturasLCD(stringCelsius, arrayIngresar);		// Array copia es la temperatura objetivo
+	memset(stringCelsius, 0, 10);							// Limpia la variable stringCelsius
 
 	if(menu == 0)
 		principal(); 											// Por default la variable menu = 0 entrando inicialmente aqui
@@ -250,6 +250,9 @@ void principal(void){ 			// La funcion principal está leyendo las teclas desde 
 	if(tecla){
 		if(tecla == 'A'){ 		// Si se presiona la tecla A, la variable menu = 1, lo que pasa a la funcion de ingresar nuevo valor
 			menu = 1; 			// Cuando se termine de ingresar valor, entra otra vez a la funcion principal
+
+			// Vaciar el array de ingreso
+			memset(arrayIngresar, 0, 10);
 		}
 		if(tecla == 'C'){
 			printf("Temperatura Predefinida: %.2f\r\n", numero1); // Si la tecla es C, muestra la cantidad que tiene por defecto
@@ -270,7 +273,7 @@ void ingresarValor(){
 		arrayIngresar[i] = tecla;
 		i++;
 		}
-		if(tecla== '#'){ 							// Si se presiona el #, convierte el array a numero, y lo guarda en la variable numero
+		if(tecla == '#'){ 							// Si se presiona el #, convierte el array a numero, y lo guarda en la variable numero
 			numero = atof(arrayIngresar);
 			printf("numero convertido a float: %.2f\n\r", numero*2);
 			i = 0; 									// Se reinicia el indice del arreglo
