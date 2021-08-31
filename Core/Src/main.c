@@ -134,16 +134,13 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-	// sprintf(stringCelsius, "%.4f", celsius);			 	// Conversión de celsius a string
+	sprintf(stringCelsius, "%.4f", celsius);			 	// Conversión de celsius a string
 
-	// mostrarTemperaturasLCD(stringCelsius, arrayIngresar);		// Array copia es la temperatura objetivo
-	// memset(stringCelsius, 0, 10);							// Limpia la variable stringCelsius
-
-	LCDChrXY(0, 1, '~');
-	LCDUpdate();
+	mostrarTemperaturasLCD(stringCelsius, arrayIngresar);	// Array copia es la temperatura objetivo
+	memset(stringCelsius, 0, 10);							// Limpia la variable stringCelsius
 
 	if(menu == 0)
-		principal(); 											// Por default la variable menu = 0 entrando inicialmente aqui
+		principal(); 										// Por default la variable menu = 0 entrando inicialmente aqui
 	else if(menu == 1)
 		ingresarValor();
 	else if(menu == 2)
@@ -321,9 +318,9 @@ void modificarTempPredefinida(){ 	// Funcion para modificar la temp predefinida
 }
 
 void mostrarTemperaturasLCD(char *temperaturaActual, char *temperaturaObjetivo){
-	LCDStr(0, (unsigned char *) "T Actual (°C)", 0);
+	LCDStr(0, (unsigned char *) "T Actual (~C)", 0);
 	LCDStr(1, (unsigned char *) temperaturaActual, 0);
-	LCDStr(3, (unsigned char *) "T Fijada (°C)", 0);
+	LCDStr(3, (unsigned char *) "T Fijada (~C)", 0);
 	LCDStr(4, (unsigned char *) temperaturaObjetivo, 0);
 	LCDUpdate();
 
