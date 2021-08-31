@@ -134,10 +134,13 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-	sprintf(stringCelsius, "%.4f", celsius);			 	// Conversión de celsius a string
+	// sprintf(stringCelsius, "%.4f", celsius);			 	// Conversión de celsius a string
 
-	mostrarTemperaturasLCD(stringCelsius, arrayIngresar);		// Array copia es la temperatura objetivo
-	memset(stringCelsius, 0, 10);							// Limpia la variable stringCelsius
+	// mostrarTemperaturasLCD(stringCelsius, arrayIngresar);		// Array copia es la temperatura objetivo
+	// memset(stringCelsius, 0, 10);							// Limpia la variable stringCelsius
+
+	LCDChrXY(0, 1, '~');
+	LCDUpdate();
 
 	if(menu == 0)
 		principal(); 											// Por default la variable menu = 0 entrando inicialmente aqui
