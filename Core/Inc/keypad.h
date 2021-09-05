@@ -29,6 +29,6 @@
 #define  	COL4_PORT		GPIOA
 
 
-void keypad_init(void);
+// void keypad_init(void);
 char keypad_read(void);
 #endif

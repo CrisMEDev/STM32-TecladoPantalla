@@ -1,14 +1,17 @@
 #include "stm32f1xx_hal.h"
 #include "keypad.h"
 
-void keypad_init(void){
-	GPIO_InitTypeDef GPIO_InitStruct;
-
-	/* GPIO Ports Clock Enable */
-	__HAL_RCC_GPIOA_CLK_ENABLE();
-	__HAL_RCC_GPIOB_CLK_ENABLE();
+// Configuración de los pines del teclado
 
 
+//void keypad_init(void){
+//  GPIO_InitTypeDef GPIO_InitStruct;
+
+  /* GPIO Ports Clock Enable */
+//  __HAL_RCC_GPIOA_CLK_ENABLE();
+//  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+/*
   GPIO_InitStruct.Pin 	= ROW1_PIN;
   GPIO_InitStruct.Mode 	= GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull 	= GPIO_NOPULL;
@@ -62,6 +65,7 @@ void keypad_init(void){
   HAL_GPIO_Init(COL4_PORT, &GPIO_InitStruct);
 
 }
+*/
 
 char keypad_read(void){
 	char letras[4][4]={	{'1','2','3','A'},
