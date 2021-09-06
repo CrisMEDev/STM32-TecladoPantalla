@@ -154,12 +154,15 @@ int main(void)
 	mostrarTemperaturasLCD(stringCelsius, arrayIngresar);	// Array copia es la temperatura objetivo
 	memset(stringCelsius, 0, 10);							// Limpia la variable stringCelsius
 
+
 	if(menu == 0)
 		principal(); 										// Por default la variable menu = 0 entrando inicialmente aqui
 	else if(menu == 1)
 		ingresarValor();
 	else if(menu == 2)
 		modificarTempPredefinida();
+
+
   }
   /* USER CODE END 3 */
 }
@@ -298,22 +301,22 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_4|GPIO_PIN_5 
-                          |GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9 
-                          |GPIO_PIN_10, GPIO_PIN_RESET);
+                          |GPIO_PIN_6|GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10 
+                          |GPIO_PIN_11, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : PA0 PA1 PA4 PA5 
-                           PA6 PA7 PA8 PA9 
-                           PA10 */
+                           PA6 PA8 PA9 PA10 
+                           PA11 */
   GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_4|GPIO_PIN_5 
-                          |GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9 
-                          |GPIO_PIN_10;
+                          |GPIO_PIN_6|GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10 
+                          |GPIO_PIN_11;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PA11 PA12 PA13 PA14 */
-  GPIO_InitStruct.Pin = GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14;
+  /*Configure GPIO pins : PA12 PA13 PA14 PA15 */
+  GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -406,6 +409,38 @@ void mostrarTemperaturasLCD(char *temperaturaActual, char *temperaturaObjetivo){
 	LCDUpdate();
 
 	return;
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	char letras[4][4]={	{'1','2','3','A'},
+						{'4','5','6','B'},
+						{'7','8','9','C'},
+						{'.','0','#','D'}};
+
+	char valor='X';
+
+	if (GPIO_Pin == GPIO_PIN_12){
+		printf("%d\n\r", 10);
+
+		if ( ( HAL_GPIO_ReadPin(ROW1_PORT, ROW1_PIN) ) == 0 ){valor=letras[0][0];}	// 1
+		if ( ( HAL_GPIO_ReadPin(ROW2_PORT, ROW2_PIN) ) == 0 ){valor=letras[1][0];}	// 4
+		if ( ( HAL_GPIO_ReadPin(ROW3_PORT, ROW3_PIN) ) == 0 ){valor=letras[2][0];}	// 7
+		if ( ( HAL_GPIO_ReadPin(ROW4_PORT, ROW4_PIN) ) == 0 ){valor=letras[3][0];}	// .
+
+		printf("%c\n\r", valor);
+
+	}
+	else if (GPIO_Pin == GPIO_PIN_13){
+		printf("%d\n\r", 20);
+	}
+	else if (GPIO_Pin == GPIO_PIN_14){
+		printf("%d\n\r", 30);
+	}
+	else if (GPIO_Pin == GPIO_PIN_15){
+		printf("%d\n\r", 40);
+	}
+
 }
 
 /* USER CODE END 4 */
