@@ -13,4 +13,5 @@
 
 ## Símbolo de grados ° agregado, se usa colocando el caracter ~ (Virgulilla)
 
+## La funcion Hal\_Delay() no funciona en la funcion de interrupción por lo que los HAL\_Delay en el archivo keypad.c se remplazaron por while's simples
 

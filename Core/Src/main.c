@@ -58,7 +58,7 @@ UART_HandleTypeDef huart2;
 char tecla = 0;				// Variable que guarda la tecla presionada
 char arrayIngresar[10];		// Arreglo que guarda el dato nuevo a ingresar
 int i = 0; 					// Contador para los arreglos
-double numero = 0.0; 		// Variable donde se guarda el numero convertido del arrayIngresar
+double numero = 0.0; 		// Variable donde se guarda el numero convertido del arrayIngresar (Temperatura objetivo)
 double numero1 = 30.0; 		// Variable que almacena el valor objetivo por defecto
 char control = 'Z';			// Variable que almacena los comandos introducidos desde teclado matricial
 
@@ -71,13 +71,64 @@ static void MX_ADC1_Init(void);
 static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
+////////////////////////////////////////////////////////////////////////////////
+// Mapeo de una lectura de entrada analógica en rango (in_min, in_max)		  //
+// a un valor en el rango (out_min, out_max)								  //
+////////////////////////////////////////////////////////////////////////////////
 float mapfloat(long x, long in_min, long in_max, long out_min, long out_max);
+
+////////////////////////////////////////////////////////////////////////////////
+// Almacena un valor de entrada por teclado en el arreglo arrayIngresar		  //
+// y lo convierte a float, ya sea para cambiar el valor objetivo (numero)	  //
+// o la temperatura pre-establecida (numero1), según sea el caso del comando  //
+// seleccionado con la interrupción											  //
+// La tecla enter se representa por #										  //
+////////////////////////////////////////////////////////////////////////////////
 void ingresarValor(void);
+
+////////////////////////////////////////////////////////////////////////////////
+// Muestra la temperatura actual contra la temperatura objetivo				  //
+////////////////////////////////////////////////////////////////////////////////
 void mostrarTemperaturasLCD(char *temperaturaActual, char *temperaturaObjetivo);
+
+////////////////////////////////////////////////////////////////////////////////
+// Muestra le primer mensaje por pantalla para darle a entender al usuario	  //
+// que puede introducir un comando											  //
+////////////////////////////////////////////////////////////////////////////////
 void mensajeInterrupcion(void);
+
+////////////////////////////////////////////////////////////////////////////////
+// Muestra por pantalla el comando seleccionado por el usuario:				  //
+// A -> Para cambiar la temperatura objetivo								  //
+// B -> Para usar el valor pre-establecido como temperatura objetivo		  //
+// C -> Para modificar el valor pre-establecido								  //
+// # -> Representa un 'enter' una vez seleccionado un comando anterior		  //
+// 																			  //
+// Caracteres diferentes a los anteriores son ignorados, dar un enter(#)	  //
+// sin comando seleccionado, hace caso omiso de la interrupcion y mantiene	  //
+// al sistema trabajando con el valor que ya tenía antes de la interrupción	  //
+////////////////////////////////////////////////////////////////////////////////
 void mostrarComandoElegido(char mensaje);
+
+////////////////////////////////////////////////////////////////////////////////
+// Funciones necesarias para inicializar la LCD agrupadas en esta función	  //
+// ya que inicializar la pantalla en la interrupción es necesario			  //
+////////////////////////////////////////////////////////////////////////////////
 void inicializarLCD(void);
+
+////////////////////////////////////////////////////////////////////////////////
+// Convierte flotantes a cadenas											  //
+////////////////////////////////////////////////////////////////////////////////
 static char * _float_to_char(float x, char *p, int CHAR_BUFF_SIZE);
+
+////////////////////////////////////////////////////////////////////////////////
+// Función llamada para verificar que pin o pines provocaron la interrupción  //
+//																			  //
+// Si el usuario provoca interrupcion con el botón de usuario (PC13)		  //
+// Se muestra un mensaje y se espera la entrada de un comando, dependiendo	  //
+// de la elección se realiza la acción correspondiente						  //
+////////////////////////////////////////////////////////////////////////////////
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
 
 /* USER CODE END PFP */
 
@@ -157,6 +208,7 @@ int main(void)
 	sprintf(voltajeEntradaPC0, "%.4f", valorADC1_PC0_toFloat);	// Conversion de voltaje de entrada a string
 
 	printf("Objetivo: %s\n\r", arrayIngresar);
+	printf("Numero: %f\n\r", numero);
 
 	mostrarTemperaturasLCD(voltajeEntradaPC0, arrayIngresar);	// Muestra el voltaje medido en PC0 y el voltaje objetivo
 	memset(voltajeEntradaPC0, 0, 10);							// Limpia la variable stringCelsius
