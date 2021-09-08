@@ -72,8 +72,8 @@ char keypad_read(void){
 						{'4','5','6','B'},
 						{'7','8','9','C'},
 						{'.','0','#','D'}};
-	int  i=0;
-	char valor=0;
+	int  i=0, j = 0;
+	char valor='N';
 
 
 	for(i=0;i<4;i++){
@@ -83,7 +83,8 @@ char keypad_read(void){
 			HAL_GPIO_WritePin(ROW4_PORT, ROW4_PIN,  GPIO_PIN_SET);
 			HAL_GPIO_WritePin(ROW1_PORT, ROW1_PIN,  GPIO_PIN_RESET);
 
-			HAL_Delay(10);
+			// HAL_Delay(10);
+			while(j < 1000)j++;j = 0;
 			while ( ( HAL_GPIO_ReadPin(COL1_PORT, COL1_PIN) ) == 0 ){valor=letras[0][0];}	//1
 			while ( ( HAL_GPIO_ReadPin(COL2_PORT, COL2_PIN) ) == 0 ){valor=letras[0][1];}	//2
 			while ( ( HAL_GPIO_ReadPin(COL3_PORT, COL3_PIN) ) == 0 ){valor=letras[0][2];}	//3
@@ -96,7 +97,8 @@ char keypad_read(void){
 			HAL_GPIO_WritePin(ROW4_PORT, ROW4_PIN,  GPIO_PIN_SET);
 			HAL_GPIO_WritePin(ROW2_PORT, ROW2_PIN,  GPIO_PIN_RESET);
 
-			HAL_Delay(10);
+			// HAL_Delay(10);
+			while(j < 1000)j++;j = 0;
 			while ( ( HAL_GPIO_ReadPin(COL1_PORT, COL1_PIN) ) == 0 ){valor=letras[1][0];}	//4
 			while ( ( HAL_GPIO_ReadPin(COL2_PORT, COL2_PIN) ) == 0 ){valor=letras[1][1];}	//5
 			while ( ( HAL_GPIO_ReadPin(COL3_PORT, COL3_PIN) ) == 0 ){valor=letras[1][2];}	//6
@@ -109,7 +111,8 @@ char keypad_read(void){
 			HAL_GPIO_WritePin(ROW4_PORT, ROW4_PIN,  GPIO_PIN_SET);
 			HAL_GPIO_WritePin(ROW3_PORT, ROW3_PIN,  GPIO_PIN_RESET);
 
-			HAL_Delay(10);
+			// HAL_Delay(10);
+			while(j < 1000)j++;j = 0;
 			while ( ( HAL_GPIO_ReadPin(COL1_PORT, COL1_PIN) ) == 0 ){valor=letras[2][0];}	//7
 			while ( ( HAL_GPIO_ReadPin(COL2_PORT, COL2_PIN) ) == 0 ){valor=letras[2][1];}	//8
 			while ( ( HAL_GPIO_ReadPin(COL3_PORT, COL3_PIN) ) == 0 ){valor=letras[2][2];}	//9
@@ -122,7 +125,8 @@ char keypad_read(void){
 			HAL_GPIO_WritePin(ROW3_PORT, ROW3_PIN,  GPIO_PIN_SET);
 			HAL_GPIO_WritePin(ROW4_PORT, ROW4_PIN,  GPIO_PIN_RESET);
 
-			HAL_Delay(10);
+			// HAL_Delay(10);
+			while(j < 1000)j++;j = 0;
 			while ( ( HAL_GPIO_ReadPin(COL1_PORT, COL1_PIN) ) == 0 ){valor=letras[3][0];}	//*
 			while ( ( HAL_GPIO_ReadPin(COL2_PORT, COL2_PIN) ) == 0 ){valor=letras[3][1];}	//0
 			while ( ( HAL_GPIO_ReadPin(COL3_PORT, COL3_PIN) ) == 0 ){valor=letras[3][2];}	//+

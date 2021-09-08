@@ -19,8 +19,8 @@
 	#define LCD_CS_HIGH()           GPIOA -> ODR |= GPIO_PIN_6
 	#define LCD_CS_LOW()            GPIOA -> ODR &= ~GPIO_PIN_6
 
-	#define LCD_RES_HIGH()          GPIOA -> ODR |= GPIO_PIN_5
-	#define LCD_RES_LOW()           GPIOA -> ODR &= ~GPIO_PIN_5
+	#define LCD_RES_HIGH()          GPIOA -> ODR |= GPIO_PIN_7
+	#define LCD_RES_LOW()           GPIOA -> ODR &= ~GPIO_PIN_7
 
 	#define LCD_CD_HIGH()           GPIOA -> ODR |= GPIO_PIN_4
 	#define LCD_CD_LOW()            GPIOA -> ODR &= ~GPIO_PIN_4
