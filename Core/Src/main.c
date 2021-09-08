@@ -83,6 +83,7 @@ float mapfloat(long x, long in_min, long in_max, long out_min, long out_max);
 // o la temperatura pre-establecida (numero1), según sea el caso del comando  //
 // seleccionado con la interrupción											  //
 // La tecla enter se representa por #										  //
+// La tecla B elimina un caracter en caso de que el usuario se equivoque	  //
 ////////////////////////////////////////////////////////////////////////////////
 void ingresarValor(void);
 
@@ -207,11 +208,11 @@ int main(void)
 	// _float_to_char(valorADC1_PC0_toFloat, voltajeEntradaPC0, 10);
 	sprintf(voltajeEntradaPC0, "%.4f", valorADC1_PC0_toFloat);	// Conversion de voltaje de entrada a string
 
-	printf("Objetivo: %s\n\r", arrayIngresar);
-	printf("Numero: %f\n\r", numero);
+	// printf("Objetivo: %s\n\r", arrayIngresar);
+	// printf("Numero: %f\n\r", numero);
 
 	mostrarTemperaturasLCD(voltajeEntradaPC0, arrayIngresar);	// Muestra el voltaje medido en PC0 y el voltaje objetivo
-	memset(voltajeEntradaPC0, 0, 10);							// Limpia la variable stringCelsius
+	memset(voltajeEntradaPC0, 0, 10);							// Limpia la variable voltajeEntradaPC0
 
   }
   /* USER CODE END 3 */
@@ -401,14 +402,14 @@ void ingresarValor(){
 
 			double aux;	// Para manejar un dato de entrada incorrecto
 
-			printf("atof: %f\n\r", atof(arrayIngresar));
+			// printf("atof: %f\n\r", atof(arrayIngresar));
 			aux = atof(arrayIngresar) ? atof(arrayIngresar) : numero;
 
 			// Si el comando introducido fue A, almacena su valor como el objetivo, sino como el valor predefinido
 			if (control == 'A') numero = aux;
 			else if(control == 'C') numero1 = aux;
 
-			printf("numero convertido a float: %.2f\n\r", numero*2);
+			// printf("numero convertido a float: %.2f\n\r", numero*2);
 			i = 0; 									// Se reinicia el indice del arreglo
 
 			// Vaciar el array de ingreso
@@ -419,12 +420,12 @@ void ingresarValor(){
 			if (control == 'A'){
 				LCDStr(3, (unsigned char *)"              ", 0);	// Para visualizar el borrado de el digito introducido
 				arrayIngresar[strlen(arrayIngresar)-1] = '\0';		// Borra el último caracter de el arreglo de ingreso
-				printf("%s\n\r",arrayIngresar);
+				// printf("%s\n\r",arrayIngresar);
 			}
 			else if (control == 'C'){
 				LCDStr(4, (unsigned char *)"              ", 0);	// Para visualizar el borrado de el digito introducido
 				arrayIngresar[strlen(arrayIngresar)-1] = '\0';		// Borra el último caracter de el arreglo de ingreso
-				printf("%s\n\r",arrayIngresar);
+				// printf("%s\n\r",arrayIngresar);
 			}
 
 			// Si se elimina el primer caracter del arreglo, mantiene a 'i' en cero
@@ -460,8 +461,8 @@ void mostrarComandoElegido(char mensaje){
 
 	char comando[5] = "";
 
-	printf("%c\n\r", mensaje);
-	printf("%s\n\r", comando);
+	// printf("%c\n\r", mensaje);
+	// printf("%s\n\r", comando);
 
 	if ( mensaje == 'A' || mensaje == 'B' || mensaje == 'C' ){
 		control = mensaje;			// Almacena el comando seleccionado por el usuario
@@ -528,7 +529,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 			mostrarComandoElegido(comando);
 		}
 		comando = 'Z';
-		printf("El comando seleccionado es: %c\n\r", control);
+		// printf("El comando seleccionado es: %c\n\r", control);
 
 		// Vaciar el array de ingreso
 		memset(arrayIngresar, 0, 10);
