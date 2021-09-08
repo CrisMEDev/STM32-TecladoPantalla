@@ -57,11 +57,9 @@ UART_HandleTypeDef huart2;
 
 char tecla = 0;				// Variable que guarda la tecla presionada
 char arrayIngresar[10];		// Arreglo que guarda el dato nuevo a ingresar
-char arrayModificar[10]; 	// Arreglo que guarda el dato de modificar temperatura nuevo
 int i = 0; 					// Contador para los arreglos
 double numero = 0.0; 		// Variable donde se guarda el numero convertido del arrayIngresar
-double numero1 = 27.0; 		// Variable donde se guarda el numero convertido del arrayModificar
-uint8_t menu = 0; 			// Variable para cambiar de funcion
+double numero1 = 30.0; 		// Variable que almacena el valor objetivo por defecto
 char control = 'Z';			// Variable que almacena los comandos introducidos desde teclado matricial
 
 /* USER CODE END PV */
@@ -74,13 +72,12 @@ static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 float mapfloat(long x, long in_min, long in_max, long out_min, long out_max);
-void principal(void);
 void ingresarValor(void);
-void modificarTempPredefinida(void);
 void mostrarTemperaturasLCD(char *temperaturaActual, char *temperaturaObjetivo);
 void mensajeInterrupcion(void);
 void mostrarComandoElegido(char mensaje);
 void inicializarLCD(void);
+static char * _float_to_char(float x, char *p, int CHAR_BUFF_SIZE);
 
 /* USER CODE END PFP */
 
@@ -96,10 +93,10 @@ void inicializarLCD(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  char stringCelsius[10] = "";
-  float celsius = 0.0;
+  char voltajeEntradaPC0[10] = "";
   unsigned int valorADC1_PC0 = 0;
   float valorADC1_PC0_toFloat = 0;
+
   /* USER CODE END 1 */
   
 
@@ -126,6 +123,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   RetargetInit(&huart2);		// INICIA LA TRANSFERENCIA POR UART2
+
   //Inicializar la pantalla LCD
   inicializarLCD();
 
@@ -138,6 +136,12 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+  // Se alamacena el valor pre establecido en numero(valor objetivo) para que en
+  // un inicio el sistema comience a ajustarse a ese valor
+  numero = numero1;
+  sprintf(arrayIngresar, "%.4f", numero);	// _float_to_char(numero, arrayIngresar, 10);
+
   while (1)
   {
     /* USER CODE END WHILE */
@@ -149,21 +153,13 @@ int main(void)
 	valorADC1_PC0 = HAL_ADC_GetValue(&hadc1);
 	valorADC1_PC0_toFloat = mapfloat(valorADC1_PC0, 0, 4095, 0, 5);
 
-	sprintf(stringCelsius, "%.4f", valorADC1_PC0_toFloat);
-	// sprintf(stringCelsius, "%.4f", celsius);			 	// Conversión de celsius a string
+	// _float_to_char(valorADC1_PC0_toFloat, voltajeEntradaPC0, 10);
+	sprintf(voltajeEntradaPC0, "%.4f", valorADC1_PC0_toFloat);	// Conversion de voltaje de entrada a string
 
-	printf("Array ingresar: %f\n\r", numero);
-	mostrarTemperaturasLCD(stringCelsius, arrayIngresar);	// Array copia es la temperatura objetivo
-	memset(stringCelsius, 0, 10);							// Limpia la variable stringCelsius
+	printf("Objetivo: %s\n\r", arrayIngresar);
 
-	/*
-	if(menu == 0)
-		principal(); 										// Por default la variable menu = 0 entrando inicialmente aqui
-	else if(menu == 1)
-		ingresarValor();
-	else if(menu == 2)
-		modificarTempPredefinida();
-	*/
+	mostrarTemperaturasLCD(voltajeEntradaPC0, arrayIngresar);	// Muestra el voltaje medido en PC0 y el voltaje objetivo
+	memset(voltajeEntradaPC0, 0, 10);							// Limpia la variable stringCelsius
 
   }
   /* USER CODE END 3 */
@@ -341,26 +337,6 @@ float mapfloat(long x, long in_min, long in_max, long out_min, long out_max){
 	return (float)(x - in_min) * (out_max - out_min) / (float)(in_max - in_min) + out_min;
 }
 
-void principal(void){ 			// La funcion principal está leyendo las teclas desde el principio
-	tecla = keypad_read();
-	if(tecla){
-		if(tecla == 'A'){ 		// Si se presiona la tecla A, la variable menu = 1, lo que pasa a la funcion de ingresar nuevo valor
-			menu = 1; 			// Cuando se termine de ingresar valor, entra otra vez a la funcion principal
-
-			// Vaciar el array de ingreso
-			memset(arrayIngresar, 0, 10);
-		}
-		if(tecla == 'C'){
-			printf("Temperatura Predefinida: %.2f\r\n", numero1); // Si la tecla es C, muestra la cantidad que tiene por defecto
-		}
-		if(tecla == 'D'){
-			printf("Editar temp\n\r"); // Si se presiona la tecla D, la variable menu = 2, lo que entra en la funcion modificarTemp
-			menu = 2;
-		}
-	}
-
-}
-
 void ingresarValor(){
 
 	tecla = keypad_read();
@@ -370,55 +346,42 @@ void ingresarValor(){
 		i++;
 		}
 		if(tecla == '#'){ 							// Si se presiona el #, convierte el array a numero, y lo guarda en la variable numero
-			numero = atof(arrayIngresar);
+
+			double aux;	// Para manejar un dato de entrada incorrecto
+
+			printf("atof: %f\n\r", atof(arrayIngresar));
+			aux = atof(arrayIngresar) ? atof(arrayIngresar) : numero;
+
+			// Si el comando introducido fue A, almacena su valor como el objetivo, sino como el valor predefinido
+			if (control == 'A') numero = aux;
+			else if(control == 'C') numero1 = aux;
+
 			printf("numero convertido a float: %.2f\n\r", numero*2);
 			i = 0; 									// Se reinicia el indice del arreglo
-			menu = 0; 								// La variable menu es 0, para que entre otra vez a la funcion principal
 
 			// Vaciar el array de ingreso
 			memset(arrayIngresar, 0, 10);
 		}
 		if(tecla == 'B'){ 							// Si se presiona la tecla B, borra el ultimo elemento del arreglo
-			printf("menos\n\r");
-			LCDStr(3, (unsigned char *)"              ", 0);	// Para visualizar el borrado de el digito introducido
-			arrayIngresar[strlen(arrayIngresar)-1] = '\0';
-			printf("%s\n\r",arrayIngresar);
 
-			// Si se elimina el primer caracter del arreglo, mantiene a i en cero
+			if (control == 'A'){
+				LCDStr(3, (unsigned char *)"              ", 0);	// Para visualizar el borrado de el digito introducido
+				arrayIngresar[strlen(arrayIngresar)-1] = '\0';		// Borra el último caracter de el arreglo de ingreso
+				printf("%s\n\r",arrayIngresar);
+			}
+			else if (control == 'C'){
+				LCDStr(4, (unsigned char *)"              ", 0);	// Para visualizar el borrado de el digito introducido
+				arrayIngresar[strlen(arrayIngresar)-1] = '\0';		// Borra el último caracter de el arreglo de ingreso
+				printf("%s\n\r",arrayIngresar);
+			}
+
+			// Si se elimina el primer caracter del arreglo, mantiene a 'i' en cero
 			(i < 0) ? i = 0 : i--;
 
 		}
 	}
 
 	return;
-}
-
-void modificarTempPredefinida(){ 	// Funcion para modificar la temp predefinida
-	tecla = keypad_read();			// Es lo mismo que ingresarValor(), solo que el valor se guarda en la variable numero1
-
-	if(tecla){					// despues de hacer esto, si se presiona la C, ya muestra el valor nuevo
-		if((tecla >= '0' && tecla <= '9') || (tecla == '.')){
-		//printf("%c\n", tecla);
-		arrayModificar[i] = tecla;
-		i++;
-		}
-		if(tecla== '#'){
-			numero1 = atof(arrayModificar);
-			printf("numero: %f\n\r", numero1);
-			i = 0;
-			menu = 0;
-			memset(arrayModificar, 0, 10);
-		}
-		if(tecla == 'B'){
-			printf("menos\n\r");
-			arrayModificar[strlen(arrayModificar)-1] = '\0';
-			printf("%s\n\r",arrayModificar);
-			i--;
-		}
-	}
-
-	return;
-
 }
 
 void mostrarTemperaturasLCD(char *temperaturaActual, char *temperaturaObjetivo){
@@ -434,8 +397,8 @@ void mostrarTemperaturasLCD(char *temperaturaActual, char *temperaturaObjetivo){
 void mensajeInterrupcion(){
 
 	inicializarLCD();
-	LCDStr(0, (unsigned char *) "Dame un", 0);
-	LCDStr(1, (unsigned char *) "comando:", 0);
+	LCDStr(0, (unsigned char *) "   Dame un    ", 1);
+	LCDStr(1, (unsigned char *) "   comando:   ", 1);
 	LCDUpdate();
 
 	return;
@@ -448,7 +411,7 @@ void mostrarComandoElegido(char mensaje){
 	printf("%c\n\r", mensaje);
 	printf("%s\n\r", comando);
 
-	if ( mensaje == 'A' || mensaje == 'B' || mensaje == 'C' || mensaje == 'D' ){
+	if ( mensaje == 'A' || mensaje == 'B' || mensaje == 'C' ){
 		control = mensaje;			// Almacena el comando seleccionado por el usuario
 		comando[0] = mensaje;		// Se almacena el char a un apuntador char para mostrar en pantalla
 		LCDStr(3, (unsigned char *) comando, 0);
@@ -466,6 +429,33 @@ void inicializarLCD(){
 	LCDUpdate();
 }
 
+static char * _float_to_char(float x, char *p, int CHAR_BUFF_SIZE){
+    char *s = p + CHAR_BUFF_SIZE; // go to end of buffer
+    for (i=0; i<CHAR_BUFF_SIZE; i++)
+    	p[i]='0';
+    uint16_t decimals;  // variable to store the decimals
+    int units;  // variable to store the units (part to left of decimal place)
+    if (x < 0) { // take care of negative numbers
+        decimals = (int)(x * -100) % 100; // make 1000 for 3 decimals etc.
+        units = (int)(-1 * x);
+    } else { // positive numbers
+        decimals = (int)(x * 100) % 100;
+        units = (int)x;
+    }
+
+    *--s = (decimals % 10) + '0';
+    decimals /= 10; // repeat for as many decimal places as you need
+    *--s = (decimals % 10) + '0';
+    *--s = '.';
+
+    while (units > 0) {
+        *--s = (units % 10) + '0';
+        units /= 10;
+    }
+    if (x < 0) *--s = '-'; // unary minus sign for negative numbers
+    return s;
+}
+
 // Función que se ejecuta con las interrupciones
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
@@ -473,6 +463,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 	if ( GPIO_Pin == GPIO_PIN_13 ){
 		char comando = 'Z';
+		control = 'Z';
 
 		// Para indicar que la interrupción está activa, se activa el led verde de la placa
 		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
@@ -490,13 +481,13 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		// Vaciar el array de ingreso
 		memset(arrayIngresar, 0, 10);
 
+		inicializarLCD();
+
 		switch(control){
-			case 'A':
+			case 'A':	// Ingresar un valor de temperatura objetivo
 
-				inicializarLCD();
-
-				LCDStr(0, (unsigned char *) "Modificar", 0);
-				LCDStr(1, (unsigned char *) "objetivo", 0);
+				LCDStr(0, (unsigned char *) "   Modificar  ", 1);
+				LCDStr(1, (unsigned char *) "   objetivo:  ", 1);
 				LCDUpdate();
 
 				while( comando != '#' ){
@@ -505,14 +496,53 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 					comando = tecla;
 				}
 
-				sprintf(arrayIngresar, "%.4f", numero);			 	// Conversión de celsius a string
+				// _float_to_char(numero, arrayIngresar, 10);
+				sprintf(arrayIngresar, "%.4f", numero);			 	// Conversión de numero a string
 
 				break;
-			case 'B':
+
+			case 'B':	// Establece el valor objetivo con un valor pre-establecido en la variable numero1
+
+				LCDStr(0, (unsigned char *) "   Valor      ", 1);
+				LCDStr(1, (unsigned char *) "   objetivo   ", 1);
+				LCDStr(2, (unsigned char *) "   fijado en  ", 1);
+
+				numero = numero1;
+				// _float_to_char(numero, arrayIngresar, 10);
+				sprintf(arrayIngresar, "%.4f", numero);			 	// Conversión de numero a string
+				LCDStr(4, (unsigned char *) arrayIngresar, 0);
+
+				LCDUpdate();
+
+				// Delay para que el usuario pueda visualizar el mensaje del cambio
+				// del valor objetivo
+				{
+					unsigned int c = 0;
+
+					while(c < 1000000)c++; c = 0;
+					while(c < 1000000)c++; c = 0;
+					while(c < 1000000)c++; c = 0;
+				}
+
 				break;
-			case 'C':
-				break;
-			case 'D':
+
+			case 'C':	// Cambia el valor de la variable que tiene un valor pre-establecido
+						// Para usarse este valor es necesario usar el comando B despues de actualizar el dato aqui
+
+				LCDStr(0, (unsigned char *) "  Modificar   ", 1);
+				LCDStr(1, (unsigned char *) "  valor pre   ", 1);
+				LCDStr(2, (unsigned char *) "  establecido ", 1);
+				LCDUpdate();
+
+				while( comando != '#' ){
+					ingresarValor();
+					LCDStr(4, (unsigned char *) arrayIngresar, 0);
+					comando = tecla;
+				}
+
+				// _float_to_char(numero, arrayIngresar, 10);
+				sprintf(arrayIngresar, "%.4f", numero);			 	// Conversión de numero a string
+
 				break;
 			default:
 				break;
@@ -520,6 +550,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 		// Para indicar que la interrupción está inactiva, se desactiva el led verde de la placa
 		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+		memset(arrayIngresar, 0, 10);
+
+		// Esta línea hace que se mantenga el valor reflejado en pantalla con la funcion mostrarTemperaturasLCD()
+		// _float_to_char(numero, arrayIngresar, 10);
+		sprintf(arrayIngresar, "%.4f", numero);
+
 		LCDClear();
 	}
 }
